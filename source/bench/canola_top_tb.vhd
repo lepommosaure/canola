@@ -2135,6 +2135,109 @@ begin
 
 
     -----------------------------------------------------------------------------------------------
+    log(ID_LOG_HDR, "Test #11: Extended frame loses SRR arbitration to standard data frame", C_SCOPE);
+    -----------------------------------------------------------------------------------------------
+    -- At the SRR bit (position 12 in the frame), an extended frame drives recessive ('1')
+    -- while a standard data frame drives RTR = '0' (dominant).  Before the fix in
+    -- ST_SEND_SRR_RTR, the controller would incorrectly go to ST_BIT_ERROR (incrementing
+    -- TEC by 8) instead of ST_ARB_LOST (no TEC change).
+    --
+    -- Setup : ctrl1 sends an extended data frame with base ID = "00000000001".
+    --         BFM   sends a standard  data frame with the same base ID.
+    --         Both nodes agree on SOF and all 11 ID_A bits.  At the SRR/RTR bit:
+    --           ctrl1 (extended) drives SRR = '1' (recessive, mandatory per CAN 2.0B).
+    --           BFM   (standard) drives RTR = '0' (dominant,  data-frame RTR).
+    --         The BFM wins; ctrl1 must detect arbitration loss, not a bit error.
+    --
+    -- Checks:
+    --   (a) tx_arb_lost_count  increments by 1
+    --   (b) tx_bit_error_count does NOT change
+    --   (c) TEC stays at 0 (arb loss does not penalise the transmitter)
+    --   (d) ctrl1 receives the BFM standard frame (switches to Rx after arb loss)
+    --   (e) BFM reports no arbitration loss
+    pulse(s_can_ctrl1_reset, s_clk, 10, "Reset ctrl1 (TEC/REC -> 0, ERROR_ACTIVE)");
+
+    s_msg_reset <= '1';
+    wait until rising_edge(s_clk);
+    s_msg_reset <= '0';
+    wait until rising_edge(s_clk);
+
+    -- Snapshot counters before the test (both are 0 after reset)
+    v_arb_lost_count     := s_can_ctrl1_reg_tx_arb_lost_count;
+    v_tx_bit_error_count := s_can_ctrl1_reg_tx_bit_error_count;
+
+    -- Configure ctrl1: extended data frame, known base ID, 1 data byte
+    s_can_ctrl1_tx_retransmit_en      <= '0';
+    s_can_ctrl1_tx_msg.ext_id         <= '1';           -- extended frame
+    s_can_ctrl1_tx_msg.remote_request <= '0';           -- data frame
+    s_can_ctrl1_tx_msg.arb_id_a       <= "00000000001"; -- base ID = 1
+    s_can_ctrl1_tx_msg.arb_id_b       <= (others => '0');
+    s_can_ctrl1_tx_msg.data_length    <= std_logic_vector(to_unsigned(1, C_DLC_LENGTH));
+    s_can_ctrl1_tx_msg.data(0)        <= x"AA";
+
+    -- Align both nodes to the same bit boundary (same technique used in Test #5)
+    wait until rising_edge(s_can_ctrl1_sample_point_tx);
+
+    -- Start ctrl1 first (extended frame transmitter)
+    wait until falling_edge(s_clk);
+    s_can_ctrl1_tx_start <= '1';
+    wait until falling_edge(s_clk);
+    s_can_ctrl1_tx_start <= transport '0' after C_CLK_PERIOD;
+
+    wait until rising_edge(s_can_ctrl1_sample_point_tx);
+
+    -- BFM transmits a standard data frame with the same 11-bit base ID.
+    -- RTR = '0' (dominant) beats SRR = '1' (recessive) at bit position 12.
+    v_xmit_data(0) := x"BB";
+    can_uvvm_write("00000000001",         -- arb_id_a: same as ctrl1
+                   "000000000000000000",  -- arb_id_b: irrelevant for standard frame
+                   '0',                   -- ext_id = '0': standard frame
+                   '0',                   -- remote_request = '0': data frame (RTR dominant)
+                   v_xmit_data,
+                   1,
+                   "BFM standard data frame: RTR=0 (dominant) wins over extended SRR=1 (recessive)",
+                   s_clk,
+                   s_can_bfm_tx,
+                   s_can_bfm_rx,
+                   v_can_tx_status,
+                   C_CAN_RX_NO_ERROR_GEN);
+
+    -- (e) BFM wins arbitration: it should not report arbitration loss
+    check_value(v_can_tx_status.arbitration_lost, false, error,
+                "BFM (standard data frame) won at SRR bit - no arb loss expected.");
+
+    -- Wait for ctrl1 to become idle (it stops transmitting immediately on arb loss)
+    wait until s_can_ctrl1_tx_busy = '0' for 50*C_CAN_BAUD_PERIOD;
+    check_value(s_can_ctrl1_tx_busy, '0', error,
+                "ctrl1 is idle after SRR arbitration loss.");
+
+    -- (d) ctrl1 switches to Rx on arb loss and receives the winning BFM frame
+    wait until s_msg_ctrl1_received = '1' for 5*C_CAN_BAUD_PERIOD;
+    check_value(s_msg_ctrl1_received, '1', error,
+                "ctrl1 received the BFM standard frame after losing SRR arbitration.");
+
+    -- (a) Arb-lost counter must have incremented by exactly 1
+    check_value(unsigned(s_can_ctrl1_reg_tx_arb_lost_count),
+                unsigned(v_arb_lost_count) + 1,
+                error,
+                "tx_arb_lost_count +1: SRR mismatch classified as arb loss, not bit error.");
+
+    -- (b) Bit-error counter must NOT have changed
+    check_value(s_can_ctrl1_reg_tx_bit_error_count, v_tx_bit_error_count,
+                error,
+                "tx_bit_error_count unchanged: SRR mismatch not misclassified as bit error.");
+
+    -- (c) TEC must remain 0: arbitration loss does not affect the transmit error counter
+    check_value(to_integer(s_can_ctrl1_transmit_error_count), 0,
+                error,
+                "TEC is zero: arbitration loss at SRR bit does not increment TEC.");
+
+    wait until rising_edge(s_can_baud_clk);
+    wait until rising_edge(s_can_baud_clk);
+    wait until rising_edge(s_can_baud_clk);
+
+
+    -----------------------------------------------------------------------------------------------
     log(ID_LOG_HDR, "Test #12: Test that BUS OFF state is reached after too many Tx errors", C_SCOPE);
     -----------------------------------------------------------------------------------------------
     pulse(s_can_ctrl1_reset, s_clk, 10, "Reset CAN controller to put it back in ACTIVE ERROR state");

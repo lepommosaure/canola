@@ -202,8 +202,16 @@ begin  -- architecture rtl
 
           when ST_SEND_SRR_RTR =>
             if BSP_TX_RX_MISMATCH = '1' then
-              BSP_TX_ACTIVE   <= '0';
-              s_fsm_state_out <= ST_BIT_ERROR;
+              BSP_TX_ACTIVE <= '0';
+              if s_reg_tx_msg.ext_id = '1' then
+                -- SRR is always recessive in an extended frame.
+                -- A dominant bit here means a standard-frame node with the
+                -- same 11-bit base ID is winning arbitration (CAN 2.0B Fig. 17).
+                s_fsm_state_out <= ST_ARB_LOST;
+              else
+                -- RTR can legitimately be dominant; any mismatch is a bit error.
+                s_fsm_state_out <= ST_BIT_ERROR;
+              end if;
             elsif BSP_TX_DONE = '1' then
               s_fsm_state_out <= ST_SETUP_IDE;
             else
