@@ -170,7 +170,7 @@ begin  -- architecture rtl
     if rising_edge(CLK) then
 
       -- Sync jump width should be at least one, but not greater than C_SYNC_JUMP_WIDTH_MAX
-      s_sync_jump_width <= maximum(maximum(1, to_integer(SYNC_JUMP_WIDTH)), C_SYNC_JUMP_WIDTH_MAX);
+      s_sync_jump_width <= minimum(maximum(1, to_integer(SYNC_JUMP_WIDTH)), C_SYNC_JUMP_WIDTH_MAX);
 
       TIME_QUANTA_RESTART  <= '0';
 
@@ -220,6 +220,7 @@ begin  -- architecture rtl
           -- Hard sync is not allowed when we are transmitting,
           -- however because of the fixed phase between rx and tx sample point,
           -- we should already be in sync with what is being transmitted
+
 
         -----------------------------------------------------------------------
         -- FSM logic for bit synchronization within a CAN frame
