@@ -18,7 +18,7 @@ if {$sim_coverage == "true"} {
 
 # Simulate TMR voters
 if {$tb_name == "tmr_voters_tb" || $tb_name == "all_tb"} {
-    vsim $coverage_option $debug_db_option -gui -t ps -novopt work.tmr_voters_tb
+    vsim $coverage_option $debug_db_option -gui -t ps  work.tmr_voters_tb
     do 00-wave_can_ctrl.do
     run -all
     if {$sim_coverage == "true"} {
@@ -28,7 +28,7 @@ if {$tb_name == "tmr_voters_tb" || $tb_name == "all_tb"} {
 
 # Simulate counters (TMR and no TMR)
 if {$tb_name == "tmr_counters_tb" || $tb_name == "all_tb"} {
-    vsim $coverage_option $debug_db_option -gui -t ps -novopt work.tmr_counters_tb
+    vsim $coverage_option $debug_db_option -gui -t ps  work.tmr_counters_tb
     do 00-wave_can_ctrl.do
     run -all
     if {$sim_coverage == "true"} {
@@ -38,7 +38,7 @@ if {$tb_name == "tmr_counters_tb" || $tb_name == "all_tb"} {
 
 # Simulate Bit Timing Logic (BTL)
 if {$tb_name == "btl_tb" || $tb_name == "all_tb"} {
-    vsim $coverage_option $debug_db_option -gui -t ps -novopt work.canola_btl_tb
+    vsim $coverage_option $debug_db_option -gui -t ps  work.canola_btl_tb
     do 00-wave_can_ctrl.do
     run -all
     if {$sim_coverage == "true"} {
@@ -48,7 +48,7 @@ if {$tb_name == "btl_tb" || $tb_name == "all_tb"} {
 
 # Simulate Bit Stream Processor (BSP)
 if {$tb_name == "bsp_tb" || $tb_name == "all_tb"} {
-    vsim $coverage_option $debug_db_option -gui -t ps -novopt work.canola_bsp_tb
+    vsim $coverage_option $debug_db_option -gui -t ps  work.canola_bsp_tb
     do 00-wave_can_ctrl.do
     run -all
     if {$sim_coverage == "true"} {
@@ -58,7 +58,7 @@ if {$tb_name == "bsp_tb" || $tb_name == "all_tb"} {
 
 # Simulate Error Management Logic (EML)
 if {$tb_name == "eml_tb" || $tb_name == "all_tb"} {
-    vsim $coverage_option $debug_db_option -gui -t ps -novopt work.canola_eml_tb
+    vsim $coverage_option $debug_db_option -gui -t ps  work.canola_eml_tb
     do 00-wave_can_ctrl.do
     run -all
     if {$sim_coverage == "true"} {
@@ -68,7 +68,7 @@ if {$tb_name == "eml_tb" || $tb_name == "all_tb"} {
 
 # Simulate standard top-level canola_top that doesn't use TMR wrappers
 if {$tb_name == "main_tb_no_tmr" || $tb_name == "all_tb"} {
-    vsim $coverage_option $debug_db_option -gui -t ps -novopt -gG_TMR_TOP_MODULE_EN=false work.canola_top_tb
+    vsim $coverage_option $debug_db_option -gui -t ps  -gG_TMR_TOP_MODULE_EN=false work.canola_top_tb
     do 00-wave_can_ctrl.do
     run -all
     if {$sim_coverage == "true"} {
@@ -78,7 +78,7 @@ if {$tb_name == "main_tb_no_tmr" || $tb_name == "all_tb"} {
 
 # Simulate top-level canola_top_tmr with triplication disabled
 if {$tb_name == "main_tb_tmr_wrap_no_tmr" || $tb_name == "all_tb"} {
-    vsim $coverage_option $debug_db_option -gui -t ps -novopt -gG_TMR_TOP_MODULE_EN=true -gG_SEE_MITIGATION_EN=false work.canola_top_tb
+    vsim $coverage_option $debug_db_option -gui -t ps  -gG_TMR_TOP_MODULE_EN=true -gG_SEE_MITIGATION_EN=false work.canola_top_tb
     do 00-wave_can_ctrl.do
     run -all
     if {$sim_coverage == "true"} {
@@ -88,7 +88,7 @@ if {$tb_name == "main_tb_tmr_wrap_no_tmr" || $tb_name == "all_tb"} {
 
 # Simulate top-level canola_top_tmr with triplication enabled
 if {$tb_name == "main_tb_tmr_wrap_tmr" || $tb_name == "all_tb"} {
-    vsim $coverage_option $debug_db_option -gui -t ps -novopt -gG_TMR_TOP_MODULE_EN=true -gG_SEE_MITIGATION_EN=true work.canola_top_tb
+    vsim $coverage_option $debug_db_option -gui -t ps  -gG_TMR_TOP_MODULE_EN=true -gG_SEE_MITIGATION_EN=true work.canola_top_tb
     do 00-wave_can_ctrl.do
     run -all
     if {$sim_coverage == "true"} {
@@ -98,7 +98,7 @@ if {$tb_name == "main_tb_tmr_wrap_tmr" || $tb_name == "all_tb"} {
 
 # Simulate standard top-level canola_axi_slave that doesn't use TMR wrappers
 if {$tb_name == "axi_tb_no_tmr" || $tb_name == "all_tb"} {
-    vsim $coverage_option $debug_db_option -gui -t ps -novopt -gG_TMR_TOP_MODULE_EN=false work.canola_axi_slave_tb
+    vsim $coverage_option $debug_db_option -gui -t ps  -gG_TMR_TOP_MODULE_EN=false work.canola_axi_slave_tb
     do 00-wave_can_ctrl.do
     run -all
     if {$sim_coverage == "true"} {
@@ -108,7 +108,7 @@ if {$tb_name == "axi_tb_no_tmr" || $tb_name == "all_tb"} {
 
 # Simulate canola_axi_slave_tmr that with triplication disabled
 if {$tb_name == "axi_tb_tmr_wrap_no_tmr" || $tb_name == "all_tb"} {
-    vsim $coverage_option $debug_db_option -gui -t ps -novopt -gG_TMR_TOP_MODULE_EN=true -gG_SEE_MITIGATION_EN=false work.canola_axi_slave_tb
+    vsim $coverage_option $debug_db_option -gui -t ps  -gG_TMR_TOP_MODULE_EN=true -gG_SEE_MITIGATION_EN=false work.canola_axi_slave_tb
     do 00-wave_can_ctrl.do
     run -all
     if {$sim_coverage == "true"} {
@@ -118,7 +118,7 @@ if {$tb_name == "axi_tb_tmr_wrap_no_tmr" || $tb_name == "all_tb"} {
 
 # Simulate canola_axi_slave_tmr that with triplication enabled
 if {$tb_name == "axi_tb_tmr_wrap_tmr" || $tb_name == "all_tb"} {
-    vsim $coverage_option $debug_db_option -gui -t ps -novopt -gG_TMR_TOP_MODULE_EN=true -gG_SEE_MITIGATION_EN=true work.canola_axi_slave_tb
+    vsim $coverage_option $debug_db_option -gui -t ps  -gG_TMR_TOP_MODULE_EN=true -gG_SEE_MITIGATION_EN=true work.canola_axi_slave_tb
     do 00-wave_can_ctrl.do
     run -all
     if {$sim_coverage == "true"} {
@@ -128,7 +128,7 @@ if {$tb_name == "axi_tb_tmr_wrap_tmr" || $tb_name == "all_tb"} {
 
 # Simulate Canola vs. Opencores CAN testbench
 if {$tb_name == "opencores_tb" || ($tb_name == "all_tb" && $sim_oc_tb == "true")} {
-    vsim $coverage_option $debug_db_option -gui -t ps -novopt work.canola_vs_opencores_can_tb
+    vsim $coverage_option $debug_db_option -gui -t ps  work.canola_vs_opencores_can_tb
     do 00-wave_can_ctrl.do
     run -all
     if {$sim_coverage == "true"} {
