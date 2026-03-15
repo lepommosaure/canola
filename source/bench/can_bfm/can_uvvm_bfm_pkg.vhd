@@ -208,7 +208,7 @@ package body can_uvvm_bfm_pkg is
     variable ack_received      : std_logic := '0';
   begin
     -- Format procedure call string
-    write(v_proc_call, to_string("can_uvvm_write(ID:"));
+    write(v_proc_call, to_string(string'("can_uvvm_write(ID:")));
 
     if extended_id = '1' then
       v_arb_id_ext_full := arb_id_a & arb_id_b;
@@ -217,19 +217,19 @@ package body can_uvvm_bfm_pkg is
       write(v_proc_call, to_string(arb_id_a, HEX, AS_IS, INCL_RADIX));
     end if;
 
-    write(v_proc_call, to_string(", Length:"));
+    write(v_proc_call, to_string(string'(", Length:")));
     write(v_proc_call, to_string(data_length, 1));
 
     if remote_request = '1' then
-      write(v_proc_call, to_string(", RTR"));
+      write(v_proc_call, to_string(string'(", RTR")));
     elsif data_length > 0 then
-      write(v_proc_call, to_string(", Data:0x"));
+      write(v_proc_call, to_string(string'(", Data:0x")));
 
       for byte_num in 0 to data_length-1 loop
         write(v_proc_call, to_string(data(byte_num), HEX));
       end loop;
     end if;
-    write(v_proc_call, to_string(")"));
+    write(v_proc_call, to_string(string'(")")));
 
     can_write(arb_id_a,
               arb_id_b,
@@ -316,7 +316,7 @@ package body can_uvvm_bfm_pkg is
     if timeout = '1' then
       alert(config.max_wait_cycles_severity, "can_uvvm_read()=> Failed, timeout.", scope);
     else
-      write(v_proc_call, to_string("can_uvvm_read()=> ID:"));
+      write(v_proc_call, to_string(string'("can_uvvm_read()=> ID:")));
 
       if extended_id = '1' then
         v_arb_id_ext_full := arb_id_a & arb_id_b;
@@ -327,21 +327,21 @@ package body can_uvvm_bfm_pkg is
 
 
       if remote_frame = '1' then
-        write(v_proc_call, to_string(" RTR"));
+        write(v_proc_call, to_string(string'(" RTR")));
       end if;
 
-      write(v_proc_call, to_string(" Length:"));
+      write(v_proc_call, to_string(string'(" Length:")));
       write(v_proc_call, to_string(data_length, 1));
 
       if data_length > 0 and remote_frame = '0' then
-        write(v_proc_call, to_string(" Data: 0x"));
+        write(v_proc_call, to_string(string'(" Data: 0x")));
 
         for byte_num in 0 to data_length-1 loop
           write(v_proc_call, to_string(data(byte_num), HEX));
         end loop;
       end if;
 
-      write(v_proc_call, to_string(". "));
+      write(v_proc_call, to_string(string'(". ")));
 
       if proc_name = "can_uvvm_read" then
         log(config.id_for_bfm, v_proc_call.all & msg, scope, msg_id_panel);
@@ -387,13 +387,13 @@ package body can_uvvm_bfm_pkg is
     variable v_can_tx_status   : can_tx_status_t;
   begin
     if remote_expect = '1' and remote_request = '1' then
-      write(v_error_msg, to_string(" => Failed. Can not request and expect remote frame"));
+      write(v_error_msg, to_string(string'(" => Failed. Can not request and expect remote frame")));
       alert(TB_ERROR, v_proc_call.all & v_error_msg.all & LF & msg, scope);
       return;
     end if;
 
     -- Format procedure call string
-    write(v_proc_call, to_string("can_uvvm_check(ID:"));
+    write(v_proc_call, to_string(string'("can_uvvm_check(ID:")));
 
     if extended_id = '1' then
       v_arb_id_ext_full := arb_id_a_exp & arb_id_b_exp;
@@ -402,21 +402,21 @@ package body can_uvvm_bfm_pkg is
       write(v_proc_call, to_string(arb_id_a_exp, HEX, AS_IS, INCL_RADIX));
     end if;
 
-    write(v_proc_call, to_string(", Length:"));
+    write(v_proc_call, to_string(string'(", Length:")));
     write(v_proc_call, to_string(data_length_exp, 1));
 
     if remote_request = '1' then
-      write(v_proc_call, to_string(", send RTR"));
+      write(v_proc_call, to_string(string'(", send RTR")));
     elsif remote_expect = '1' then
-      write(v_proc_call, to_string(", expect RTR"));
+      write(v_proc_call, to_string(string'(", expect RTR")));
     elsif data_length_exp > 0 then
-      write(v_proc_call, to_string(", Data:0x"));
+      write(v_proc_call, to_string(string'(", Data:0x")));
 
       for byte_num in 0 to data_length_exp-1 loop
         write(v_proc_call, to_string(data_exp(byte_num), HEX));
       end loop;
     end if;
-    write(v_proc_call, to_string(")"));
+    write(v_proc_call, to_string(string'(")")));
 
     -- Send a remote frame first if requested, and wait for response
     if remote_request = '1' then
@@ -520,7 +520,7 @@ package body can_uvvm_bfm_pkg is
     -- Compare data if received and not remote frame
     if v_remote_frame = '0' and v_data_length > 0 then
       if v_data(0 to v_data_length-1) /= data_exp(0 to v_data_length-1) then
-        write(v_error_msg, to_string("=> Failed. Received data:0x"));
+        write(v_error_msg, to_string(string'("=> Failed. Received data:0x")));
 
         for byte_num in 0 to v_data_length-1 loop
           write(v_error_msg, to_string(v_data(byte_num), HEX));
@@ -568,7 +568,7 @@ package body can_uvvm_bfm_pkg is
   begin
 
     -- Format procedure call string
-    write(v_proc_call, to_string("can_uvvm_recv_error_flag() => "));
+    write(v_proc_call, to_string(string'("can_uvvm_recv_error_flag() => ")));
 
     if can_rx = '0' then
       v_error_flag_started := true;
@@ -664,7 +664,7 @@ package body can_uvvm_bfm_pkg is
   begin
 
     -- Format procedure call string
-    write(v_proc_call, to_string("can_uvvm_recv_error_flag() => "));
+    write(v_proc_call, to_string(string'("can_uvvm_recv_error_flag() => ")));
 
     if can_rx = '1' then
       v_error_flag_started := true;
